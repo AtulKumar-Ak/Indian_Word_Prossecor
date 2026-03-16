@@ -16,6 +16,10 @@ interface EditorStore {
   isLandscape: boolean;
   toggleOrientation: () => void;
 
+  // AI Sidebar
+  isAiSidebarOpen: boolean;
+  toggleAiSidebar: () => void;
+
   setEditor: (editor: Editor | null) => void;
 }
 
@@ -38,6 +42,13 @@ export const useEditorStore = create<EditorStore>((set) => ({
   toggleOrientation: () =>
     set((state) => ({
       isLandscape: !state.isLandscape,
+    })),
+
+  // AI Sidebar
+  isAiSidebarOpen: false,
+  toggleAiSidebar: () =>
+    set((state) => ({
+      isAiSidebarOpen: !state.isAiSidebarOpen,
     })),
 
   setEditor: (editor) => set({ editor }),
