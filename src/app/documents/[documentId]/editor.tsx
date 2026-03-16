@@ -38,12 +38,11 @@ export const Editor = () => {
       setEditor(editor)
     },
     editorProps: {
-      attributes: {
-        style: "padding-left: 56px; padding-right: 56px;",
-        class:
-          "focus:outline-none bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text shadow-sm mx-auto prose prose-sm max-w-none",
-      },
-    },
+  attributes: {
+    class:
+      "focus:outline-none w-full h-full text-foreground prose prose-sm max-w-none",
+  },
+},
     extensions: [
       liveblocks,
       StarterKit.configure({
@@ -88,9 +87,9 @@ export const Editor = () => {
     immediatelyRender: false,
   })
 
-  return (
-    <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 py-6">
-      <EditorContent editor={editor} />
-    </div>
-  )
+ return (
+  <div className="w-full h-full">
+    <EditorContent editor={editor} />
+  </div>
+)
 }

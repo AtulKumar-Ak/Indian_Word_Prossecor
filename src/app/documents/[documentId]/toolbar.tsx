@@ -1,5 +1,5 @@
 "use client"
-
+import { ZoomIn, ZoomOut } from "lucide-react";
 import { useState, useCallback, useRef,useEffect } from "react"
 import { useEditorStore } from "@/store/use-editor-store"
 import { useLanguageStore } from "@/store/use-language-store"
@@ -75,7 +75,15 @@ const HIGHLIGHT_COLORS = [
 ]
 
 export const Toolbar = () => {
-  const { editor } = useEditorStore()
+ const {
+  editor,
+  zoom,
+  setZoom,
+  isLandscape,
+  toggleOrientation,
+  isPresentationMode,
+  togglePresentationMode
+} = useEditorStore();
   const { language, supportedLanguages, setLanguage } = useLanguageStore()
   const [activeTab, setActiveTab] = useState("home")
   const [isListening, setIsListening] = useState(false)
@@ -83,7 +91,6 @@ export const Toolbar = () => {
   const [searchText, setSearchText] = useState("")
   const [linkUrl, setLinkUrl] = useState("")
   const [isTranslating, setIsTranslating] = useState(false);
-  const { isPresentationMode, togglePresentationMode } = useEditorStore();
   // 2. Create a reference to hold the recognition object
   const recognitionRef = useRef<any>(null);
   useEffect(() => {
@@ -322,7 +329,9 @@ const handleTranslate = useCallback(async () => {
             disabled={disabled}
             className={cn(
               "p-1.5 rounded transition-colors disabled:opacity-50",
-              active ? "bg-[#1a5276] text-white" : "hover:bg-neutral-200 text-neutral-700"
+              active
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted text-foreground"
             )}
           >
             <Icon className="size-4" />
@@ -336,9 +345,9 @@ const handleTranslate = useCallback(async () => {
   )
 
   return (
-    <div className="flex flex-col bg-[#F1F4F9] border-b border-neutral-300 shadow-sm">
+    <div className="flex flex-col bg-background border-b border-border shadow-sm transition-colors">
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-4 py-1 bg-white text-white">
+      <div className="flex items-center justify-between px-4 py-1 bg-card text-foreground transition-colors">
         <div className="flex items-center whitespace-nowrap">
           <img
             src="/logo.png"
@@ -352,7 +361,7 @@ const handleTranslate = useCallback(async () => {
       </div>
 
       {/* Tab Bar */}
-      <div className="flex items-center gap-x-1 px-2 pt-1 bg-slate-100">
+      <div className="flex items-center gap-x-1 px-2 pt-1 bg-muted transition-colors">
         {["file", "home", "insert", "view"].map((tab) => (
           <button
             key={tab}
@@ -360,9 +369,9 @@ const handleTranslate = useCallback(async () => {
             onClick={() => setActiveTab(tab)}
             className={cn(
               "px-4 py-1.5 text-sm rounded-t-md transition capitalize",
-              activeTab === tab
-                ? "bg-slate-200 font-semibold text-[#1a5276] border-x border-t border-neutral-300"
-                : "hover:bg-white text-neutral-600"
+             activeTab === tab
+               ? "bg-card font-semibold text-foreground border-x border-t border-border"
+               : "hover:bg-muted text-muted-foreground"
             )}
           >
             {`${translations[tab]['en']} / ${translations[tab][language.code]}`}
@@ -371,7 +380,7 @@ const handleTranslate = useCallback(async () => {
       </div>
 
       {/* Toolbar Content */}
-      <div className="flex items-center gap-x-1.5 px-3 py-2 bg-slate-200 border-t border-neutral-200 flex-wrap">
+      <div className="flex items-center gap-x-1.5 px-3 py-2 bg-card border-t border-border flex-wrap transition-colors">
         {/* FILE TAB */}
         {activeTab === "file" && (
           <>
@@ -381,35 +390,34 @@ const handleTranslate = useCallback(async () => {
                 editor.chain().focus().clearContent().run()
                 editor.chain().focus().setContent("<p></p>").run()
               }}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+              className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <FilePlusIcon className="size-4" /> New / नया
             </button>
             <button
               type="button"
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+              className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <FolderOpenIcon className="size-4" /> Open / खोलें
             </button>
             <button
               type="button"
               onClick={handleDownload}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
-            >
+             className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"            >
               <SaveIcon className="size-4" /> Save / सहेजें
             </button>
             <Separator orientation="vertical" className="h-6 mx-1" />
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+             className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <PrinterIcon className="size-4" /> Print / प्रिंट
             </button>
             <button
               type="button"
               onClick={handleDownload}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+              className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <DownloadIcon className="size-4" /> Download / डाउनलोड
             </button>
@@ -438,7 +446,7 @@ const handleTranslate = useCallback(async () => {
             {/* Font Selection */}
             <select
               onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
-              className="bg-neutral-50 border text-xs p-1.5 rounded min-w-[150px] font-medium focus:border-[#1a5276] focus:outline-none"
+            className="bg-card border border-border text-xs p-1.5 rounded text-foreground focus:outline-none"
               value={editor.getAttributes("textStyle").fontFamily || "Mangal"}
             >
               {indianFonts.map((font) => (
@@ -456,7 +464,7 @@ const handleTranslate = useCallback(async () => {
                   setLanguage(selectedLang);
                 }
               }}
-              className="bg-neutral-50 border text-xs p-1.5 rounded min-w-[150px] font-medium focus:border-[#1a5276] focus:outline-none"
+             className="bg-card border border-border text-xs p-1.5 rounded text-foreground focus:outline-none"
               value={language.code}
             >
               {supportedLanguages.map((lang) => (
@@ -475,7 +483,7 @@ const handleTranslate = useCallback(async () => {
                 const size = e.target.value
                 editor.chain().focus().setMark("textStyle", { fontSize: `${size}px` }).run()
               }}
-              className="bg-neutral-50 border text-xs p-1.5 rounded w-[65px] font-medium focus:border-[#1a5276] focus:outline-none"
+              className="bg-card border border-border text-xs p-1.5 rounded w-[65px] font-medium text-foreground focus:outline-none"
               defaultValue="14"
             >
               {FONT_SIZES.map((size) => (
@@ -489,7 +497,7 @@ const handleTranslate = useCallback(async () => {
             {/* Text Color */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="p-1.5 rounded hover:bg-neutral-200 relative">
+                <button type="button" className="p-1.5 rounded hover:bg-muted transition-colors">
                   <TypeIcon className="size-4" />
                   <div
                     className="absolute bottom-0.5 left-1 right-1 h-1 rounded-full"
@@ -516,7 +524,7 @@ const handleTranslate = useCallback(async () => {
             {/* Highlight Color */}
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="p-1.5 rounded hover:bg-neutral-200">
+                <button type="button" className="p-1.5 rounded hover:bg-muted transition-colors">
                   <HighlighterIcon className="size-4" />
                 </button>
               </PopoverTrigger>
@@ -547,20 +555,177 @@ const handleTranslate = useCallback(async () => {
             <ToolbarButton icon={RemoveFormattingIcon} onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} tooltip="Clear Formatting / फॉर्मेटिंग हटाएं" />
             <Separator orientation="vertical" className="h-6 mx-1" />
 
-            {/* Alignment */}
-            <ToolbarButton icon={AlignLeftIcon} onClick={() => editor.chain().focus().setTextAlign("left").run()} active={editor.isActive({ textAlign: "left" })} tooltip="Align Left / बाएं" />
-            <ToolbarButton icon={AlignCenterIcon} onClick={() => editor.chain().focus().setTextAlign("center").run()} active={editor.isActive({ textAlign: "center" })} tooltip="Align Center / केंद्र" />
-            <ToolbarButton icon={AlignRightIcon} onClick={() => editor.chain().focus().setTextAlign("right").run()} active={editor.isActive({ textAlign: "right" })} tooltip="Align Right / दाएं" />
-            <ToolbarButton icon={AlignJustifyIcon} onClick={() => editor.chain().focus().setTextAlign("justify").run()} active={editor.isActive({ textAlign: "justify" })} tooltip="Justify / जस्टिफाई" />
-            <Separator orientation="vertical" className="h-6 mx-1" />
+           {/* Dynamic Alignment */}
+<Popover>
+  <PopoverTrigger asChild>
+    <button
+      type="button"
+      className="p-1.5 rounded hover:bg-muted text-foreground transition"
+    >
+      {editor.isActive({ textAlign: "center" }) ? (
+        <AlignCenterIcon className="size-4" />
+      ) : editor.isActive({ textAlign: "right" }) ? (
+        <AlignRightIcon className="size-4" />
+      ) : editor.isActive({ textAlign: "justify" }) ? (
+        <AlignJustifyIcon className="size-4" />
+      ) : (
+        <AlignLeftIcon className="size-4" />
+      )}
+    </button>
+  </PopoverTrigger>
 
-            {/* Lists */}
-            <ToolbarButton icon={ListIcon} onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} tooltip="Bullet List / बुलेट लिस्ट" />
-            <ToolbarButton icon={ListOrderedIcon} onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} tooltip="Numbered List / क्रमांकित सूची" />
-            <ToolbarButton icon={CheckSquareIcon} onClick={() => editor.chain().focus().toggleTaskList().run()} active={editor.isActive("taskList")} tooltip="Task List / कार्य सूची" />
-            <ToolbarButton icon={OutdentIcon} onClick={() => editor.chain().focus().liftListItem("listItem").run()} tooltip="Decrease Indent / इंडेंट घटाएं" />
-            <ToolbarButton icon={IndentIcon} onClick={() => editor.chain().focus().sinkListItem("listItem").run()} tooltip="Increase Indent / इंडेंट बढ़ाएं" />
-            <Separator orientation="vertical" className="h-6 mx-1" />
+  <PopoverContent className="w-40 p-2 bg-card border border-border">
+    <div className="flex flex-col gap-1">
+
+      <button
+        onClick={() => editor.chain().focus().setTextAlign("left").run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive({ textAlign: "left" }) && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <AlignLeftIcon className="size-4" />
+          Left
+        </div>
+        {editor.isActive({ textAlign: "left" }) && "✓"}
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().setTextAlign("center").run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive({ textAlign: "center" }) && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <AlignCenterIcon className="size-4" />
+          Center
+        </div>
+        {editor.isActive({ textAlign: "center" }) && "✓"}
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().setTextAlign("right").run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive({ textAlign: "right" }) && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <AlignRightIcon className="size-4" />
+          Right
+        </div>
+        {editor.isActive({ textAlign: "right" }) && "✓"}
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive({ textAlign: "justify" }) && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <AlignJustifyIcon className="size-4" />
+          Justify
+        </div>
+        {editor.isActive({ textAlign: "justify" }) && "✓"}
+      </button>
+
+    </div>
+  </PopoverContent>
+</Popover>
+
+<Separator orientation="vertical" className="h-6 mx-1" />
+
+            {/* Lists & Indentation */}
+<Popover>
+  <PopoverTrigger asChild>
+    <button
+      type="button"
+      className="p-1.5 rounded hover:bg-muted text-foreground transition"
+    >
+      {editor.isActive("orderedList") ? (
+        <ListOrderedIcon className="size-4" />
+      ) : editor.isActive("taskList") ? (
+        <CheckSquareIcon className="size-4" />
+      ) : editor.isActive("bulletList") ? (
+        <ListIcon className="size-4" />
+      ) : (
+        <ListIcon className="size-4" />
+      )}
+    </button>
+  </PopoverTrigger>
+
+  <PopoverContent className="w-48 p-2 bg-card border border-border">
+    <div className="flex flex-col gap-1">
+
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive("bulletList") && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <ListIcon className="size-4" />
+          Bullet List
+        </div>
+        {editor.isActive("bulletList") && "✓"}
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive("orderedList") && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <ListOrderedIcon className="size-4" />
+          Numbered List
+        </div>
+        {editor.isActive("orderedList") && "✓"}
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().toggleTaskList().run()}
+        className={cn(
+          "flex items-center justify-between px-2 py-1 rounded hover:bg-muted text-sm",
+          editor.isActive("taskList") && "bg-muted"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <CheckSquareIcon className="size-4" />
+          Task List
+        </div>
+        {editor.isActive("taskList") && "✓"}
+      </button>
+
+      <div className="border-t border-border my-1" />
+
+      <button
+        onClick={() => editor.chain().focus().sinkListItem("listItem").run()}
+        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted text-sm"
+      >
+        <IndentIcon className="size-4" />
+        Increase Indent
+      </button>
+
+      <button
+        onClick={() => editor.chain().focus().liftListItem("listItem").run()}
+        className="flex items-center gap-2 px-2 py-1 rounded hover:bg-muted text-sm"
+      >
+        <OutdentIcon className="size-4" />
+        Decrease Indent
+      </button>
+
+    </div>
+  </PopoverContent>
+</Popover>
+
+<Separator orientation="vertical" className="h-6 mx-1" />
 
             {/* Voice Features */}
             <ToolbarButton
@@ -585,7 +750,7 @@ const handleTranslate = useCallback(async () => {
             <button
               type="button"
               onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+             className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <TableIcon className="size-4" /> Table / तालिका
             </button>
@@ -595,7 +760,7 @@ const handleTranslate = useCallback(async () => {
                 const url = window.prompt("Enter Image URL / छवि URL दर्ज करें:")
                 if (url) editor.chain().focus().setImage({ src: url }).run()
               }}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+              className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
             >
               <ImageIcon className="size-4" /> Picture / चित्र
             </button>
@@ -604,7 +769,7 @@ const handleTranslate = useCallback(async () => {
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
+                 className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"
                 >
                   <Link2Icon className="size-4" /> Link / लिंक
                 </button>
@@ -628,31 +793,84 @@ const handleTranslate = useCallback(async () => {
             <button
               type="button"
               onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="flex items-center gap-1.5 text-xs border px-3 py-1.5 rounded bg-neutral-50 hover:bg-white hover:border-[#1a5276] transition"
-            >
+             className="flex items-center gap-1.5 text-xs border border-border px-3 py-1.5 rounded bg-card hover:bg-muted transition-colors text-foreground"            >
               <MinusIcon className="size-4" /> Divider / विभाजक
             </button>
           </>
         )}
 
-        {/* VIEW TAB */}
-        {activeTab === "view" && (
-          <>
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="Search text... / टेक्स्ट खोजें..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="text-xs w-48 h-8"
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-              <Button size="sm" variant="outline" onClick={handleSearch} className="h-8 bg-transparent">
-                <SearchIcon className="size-4 mr-1" /> Find / खोजें
-              </Button>
-            </div>
-          </>
-        )}
+       {/* VIEW TAB */}
+{activeTab === "view" && (
+  <>
+    {/* Search */}
+    <div className="flex items-center gap-2">
+      <Input
+        placeholder="Search text... / टेक्स्ट खोजें..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="text-xs w-48 h-8"
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+      />
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleSearch}
+        className="h-8 bg-transparent"
+      >
+        <SearchIcon className="size-4 mr-1" />
+        Find / खोजें
+      </Button>
+    </div>
+
+    <Separator orientation="vertical" className="h-6 mx-2" />
+
+    {/* Zoom Controls */}
+    <div className="flex items-center gap-2">
+
+      {/* Zoom Out */}
+      <button
+        onClick={() => setZoom(Math.max(50, zoom - 10))}
+        className="p-1.5 rounded hover:bg-muted transition"
+      >
+        <ZoomOut className="size-4" />
+      </button>
+
+      {/* Zoom Display */}
+      <button
+        onClick={() => setZoom(100)}
+        className="text-sm w-14 text-center font-medium hover:bg-muted rounded px-1 py-0.5 transition"
+      >
+        {zoom}%
+      </button>
+
+      {/* Zoom In */}
+      <button
+        onClick={() => setZoom(Math.min(200, zoom + 10))}
+        className="p-1.5 rounded hover:bg-muted transition"
+      >
+        <ZoomIn className="size-4" />
+      </button>
+<Separator orientation="vertical" className="h-6 mx-2" />
+
+{/* Orientation Toggle */}
+<button
+  onClick={toggleOrientation}
+  className={cn(
+    "px-3 py-1.5 text-xs rounded border transition",
+    isLandscape
+      ? "bg-primary text-primary-foreground"
+      : "bg-card border-border hover:bg-muted text-foreground"
+  )}
+>
+  {isLandscape ? "Landscape / क्षैतिज" : "Portrait / लंबवत"}
+</button>
+    </div>
+  </>
+)}
+
       </div>
     </div>
+    
   )
 }
+

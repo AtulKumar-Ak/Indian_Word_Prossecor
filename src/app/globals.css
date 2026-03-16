@@ -261,4 +261,18 @@ body {
 
   }
 
-  
+  /* Fix select dropdown in dark mode */
+select {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+select option {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+select {
+  background-color: var(--background);
+  color: var(--foreground);
+}

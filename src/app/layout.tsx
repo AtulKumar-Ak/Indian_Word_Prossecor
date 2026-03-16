@@ -2,7 +2,10 @@ import "regenerator-runtime/runtime";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import ThemeToggle from "../components/ui/theme-toggle";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,11 +20,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className} suppressHydrationWarning={true}>
-        <ConvexClientProvider>
-          {children}
-        </ConvexClientProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.className} bg-background text-foreground transition-colors duration-200`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          storageKey="bharatdocs-theme"
+        >
+          <ConvexClientProvider>
+
+            {/* Top Right Theme Toggle */}
+            <div className="fixed top-4 right-4 z-50">
+              <ThemeToggle />
+            </div>
+
+            {children}
+
+          </ConvexClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
