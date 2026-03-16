@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Souvik Spiritual Daily Routine Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      margin: 0;
+      padding: 16px;
+      color: #fff;
+    }
+    h1 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+    select {
+      padding: 10px;
+      margin: 12px auto 20px;
+      display: block;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    .day-card {
+      background: #ffffff;
+      color: #000;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .day-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    .activity {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .activity input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    .activity input[type="text"] {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    .details-toggle {
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 6px;
+    }
+    .details {
+      display: none;
+      margin-left: 26px;
+      margin-bottom: 8px;
+    }
+    .details textarea {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      padding: 6px;
+      font-size: 13px;
+    }
+    .add-btn {
+      width: 100%;
+      padding: 8px;
+      background: #2c5364;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      margin-top: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .add-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body><h1>🚀 Spiritual Daily Routine🌸</h1>
+<div class="subtitle">Build discipline for my spiritual life</div><select id="monthSelect" onchange="generateCalendar()">
+  <option value="0">January</option>
+  <option value="1">February</option>
+  <option value="2">March</option>
+  <option value="3">April</option>
+  <option value="4">May</option>
+  <option value="5">June</option>
+  <option value="6">July</option>
+  <option value="7">August</option>
+  <option value="8">September</option>
+  <option value="9">October</option>
+  <option value="10">November</option>
+  <option value="11">December</option>
+</select><div id="calendar"></div><script>
+  function daysInMonth(month, year) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  function toggleDetails(el) {
+    const details = el.parentElement.nextElementSibling;
+    details.style.display = details.style.display === 'block' ? 'none' : 'block';
+    el.innerText = details.style.display === 'block' ? '▲' : '▼';
+  }
+
+  function addActivity(container) {
+    const activityDiv = document.createElement('div');
+
+    const activityRow = document.createElement('div');
+    activityRow.className = 'activity';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Enter your activity (e.g., Work on startup and spiritual idea)';
+
+    const arrow = document.createElement('span');
+    arrow.className = 'details-toggle';
+    arrow.innerText = '▼';
+    arrow.onclick = function () { toggleDetails(arrow); };
+
+    activityRow.appendChild(checkbox);
+    activityRow.appendChild(input);
+    activityRow.appendChild(arrow);
+
+    const detailsDiv = document.createElement('div');
+    detailsDiv.className = 'details';
+
+    const textarea = document.createElement('textarea');
+    textarea.placeholder = 'Why this matters for my entrepreneurial and spiritual future? Notes, ideas, outcomes…';
+
+    detailsDiv.appendChild(textarea);
+
+    activityDiv.appendChild(activityRow);
+    activityDiv.appendChild(detailsDiv);
+
+    container.appendChild(activityDiv);
+  }
+
+  function generateCalendar() {
+    const calendar = document.getElementById('calendar');
+    calendar.innerHTML = '';
+
+    const month = document.getElementById('monthSelect').value;
+    const year = new Date().getFullYear();
+    const totalDays = daysInMonth(month, year);
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dayCard = document.createElement('div');
+      dayCard.className = 'day-card';
+
+      const title = document.createElement('div');
+      title.className = 'day-title';
+      title.innerText = `Day ${day}`;
+
+      dayCard.appendChild(title);
+
+      const activitiesContainer = document.createElement('div');
+      dayCard.appendChild(activitiesContainer);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-btn';
+      addBtn.innerText = '+ Add Activity';
+      addBtn.onclick = function () { addActivity(activitiesContainer); };
+
+      dayCard.appendChild(addBtn);
+
+      calendar.appendChild(dayCard);
+    }
+  }
+
+  generateCalendar();
+</script></body>
+</html>
