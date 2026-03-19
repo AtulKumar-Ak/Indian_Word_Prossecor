@@ -11,7 +11,7 @@ import { useEditorStore } from "@/store/use-editor-store";
 import { Button } from "@/components/ui/button"; 
 import { EyeOff } from "lucide-react"; 
 import { cn } from "@/lib/utils";
-import { AiSidebar } from "@/components/ui/AiSidebar"; // Import your new sidebar
+import { AiSidebar } from "@/components/ui/AiSidebar"; 
 
 interface DocumentIdPageProps {
   params: Promise<{ documentId: Id<"documents"> }>;
@@ -24,7 +24,7 @@ export default function DocumentIdPage({ params }: DocumentIdPageProps) {
     togglePresentationMode, 
     zoom,
     isLandscape,
-    isAiSidebarOpen // Destructure the new state
+    isAiSidebarOpen 
   } = useEditorStore();
   
   const document = useQuery(api.documents.getById, {
@@ -36,40 +36,46 @@ export default function DocumentIdPage({ params }: DocumentIdPageProps) {
 
   return (
     <Room roomId={unwrappedParams.documentId}>
-      {/* Top Fixed Area (Menu + Toolbar) */}
-      {!isPresentationMode && (
-        <div className="fixed top-0 left-0 right-0 z-50 shadow-sm print:hidden">
-          <Toolbar />
-        </div>
-      )}
-
-      {/* Main Content Area (Below Toolbar) */}
-      <div
-        className={cn(
-          "flex h-screen w-full overflow-hidden transition-all duration-300",
-          isPresentationMode ? "pt-0 bg-white dark:bg-black" : "pt-[96px] bg-background"
+      {/* Root Flex Container */}
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-background">
+        
+        {/* Top Area (Menu + Toolbar) -> Flex Shrink prevents it from collapsing */}
+        {!isPresentationMode && (
+          <div className="flex-shrink-0 z-50 shadow-sm print:hidden">
+            <Toolbar />
+          </div>
         )}
-      >
-        {/* Editor Workspace (Scrollable) */}
-        <div className="flex-1 overflow-y-auto bg-muted/40 dark:bg-neutral-900 flex justify-center py-10">
-          <div
-            className={cn(
-              "shadow-2xl transition-all duration-300 h-fit mb-20",
-              "bg-white dark:bg-neutral-950",
-              isLandscape ? "w-[1123px] min-h-[794px]" : "w-[794px] min-h-[1123px]"
-            )}
-            style={{ zoom: zoom / 100 }}
-          >
-            <div className="w-full h-full px-20 py-24">
-              <Editor />
+
+        {/* Main Content Area (Shares the remaining space) */}
+        <div
+          className={cn(
+            "flex flex-1 overflow-hidden transition-all duration-300",
+            isPresentationMode && "bg-white dark:bg-black"
+          )}
+        >
+          {/* Editor Workspace (Scrollable) */}
+          <div className="flex-1 overflow-y-auto bg-muted/40 dark:bg-neutral-900 flex justify-center py-10">
+            <div
+              className={cn(
+                "shadow-2xl transition-all duration-300 h-fit mb-20",
+                "bg-white dark:bg-neutral-950",
+                // MUCH WIDER SIZES: 950px for portrait, 1200px for landscape
+                isLandscape ? "w-[1200px] min-h-[850px]" : "w-[950px] min-h-[1200px]"
+              )}
+              style={{ zoom: zoom / 100 }}
+            >
+              {/* MUCH SMALLER PADDING: px-12 gives the text a very wide writing area */}
+              <div className="w-full h-full px-12 py-16">
+                <Editor />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Side AI Panel */}
-        {!isPresentationMode && isAiSidebarOpen && (
-          <AiSidebar />
-        )}
+          {/* Right Side AI Panel */}
+          {!isPresentationMode && isAiSidebarOpen && (
+            <AiSidebar />
+          )}
+        </div>
       </div>
 
       {/* Exit Presentation Mode Button */}

@@ -10,7 +10,7 @@ import Underline from "@tiptap/extension-underline"
 import Color from "@tiptap/extension-color"
 import TextAlign from "@tiptap/extension-text-align"
 import Highlight from "@tiptap/extension-highlight"
-import {Table} from "@tiptap/extension-table"
+import { Table } from "@tiptap/extension-table"
 import TableRow from "@tiptap/extension-table-row"
 import TableHeader from "@tiptap/extension-table-header"
 import TableCell from "@tiptap/extension-table-cell"
@@ -22,11 +22,45 @@ import Subscript from "@tiptap/extension-subscript"
 import Superscript from "@tiptap/extension-superscript"
 import Placeholder from "@tiptap/extension-placeholder"
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap";
-import { Liveblocks } from "@liveblocks/node"
+import { Extension } from "@tiptap/core" // ADDED: Core extension utility
+
+// --- CUSTOM FONT SIZE EXTENSION ---
+// TipTap does not have a native font-size extension, so we must define how it reads and writes the CSS style.
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addOptions() {
+    return {
+      types: ['textStyle'],
+    }
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontSize) {
+                return {}
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              }
+            },
+          },
+        },
+      },
+    ]
+  },
+})
+// ----------------------------------
 
 export const Editor = () => {
   const { setEditor } = useEditorStore()
   const liveblocks = useLiveblocksExtension()
+  
   const editor = useEditor({
     onCreate({ editor }) {
       setEditor(editor)
@@ -38,11 +72,10 @@ export const Editor = () => {
       setEditor(editor)
     },
     editorProps: {
-  attributes: {
-    class:
-      "focus:outline-none w-full h-full text-foreground prose prose-sm max-w-none",
-  },
-},
+      attributes: {
+        class: "focus:outline-none w-full h-full text-foreground prose prose-sm max-w-none",
+      },
+    },
     extensions: [
       liveblocks,
       StarterKit.configure({
@@ -58,6 +91,7 @@ export const Editor = () => {
       }),
       TextStyle,
       FontFamily,
+      FontSize, // ADDED: Our custom FontSize extension
       Underline,
       Color,
       Highlight.configure({ multicolor: true }),
@@ -87,9 +121,9 @@ export const Editor = () => {
     immediatelyRender: false,
   })
 
- return (
-  <div className="w-full h-full">
-    <EditorContent editor={editor} />
-  </div>
-)
+  return (
+    <div className="w-full h-full">
+      <EditorContent editor={editor} />
+    </div>
+  )
 }
