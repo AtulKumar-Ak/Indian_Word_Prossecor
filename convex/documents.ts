@@ -1,9 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-// 1. Function to CREATE a new blank document
+// 1. Function to CREATE a new blank document (UPDATED FOR TEMPLATES)
 export const create = mutation({
-  args: { title: v.string() }, 
+  args: { 
+    title: v.string(),
+    initialContent: v.optional(v.string()) // NEW: Allow frontend to pass template JSON
+  }, 
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
@@ -13,7 +16,8 @@ export const create = mutation({
     const documentId = await ctx.db.insert("documents", {
       title: args.title,
       ownerId: identity.subject,
-      initialContent: "",
+      // NEW: Use the provided template content, OR default to a safe blank TipTap document
+      initialContent: args.initialContent || '{"type":"doc","content":[{"type":"paragraph"}]}',
     });
 
     return documentId;
@@ -35,9 +39,6 @@ export const get = query({
   },
 });
 
-// ... keep imports and existing create/get functions ...
-
-// 3. Function to GET a single document by its ID
 // 3. Function to GET a single document by its ID
 export const getById = query({
   args: { documentId: v.id("documents") },

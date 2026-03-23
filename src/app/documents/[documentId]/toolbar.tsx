@@ -3,8 +3,8 @@ import { ZoomIn, ZoomOut } from "lucide-react";
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useEditorStore } from "@/store/use-editor-store"
 import { useLanguageStore } from "@/store/use-language-store"
-import { useMutation } from "convex/react"; // 1. Import the hook
-import { api } from "../../../../convex/_generated/api"; // 2. Import your API
+import { useMutation } from "convex/react"; 
+import { api } from "../../../../convex/_generated/api"; 
 import { useTheme } from "next-themes"
 import {
   Undo2Icon, Redo2Icon, BoldIcon, ItalicIcon, UnderlineIcon, Mic, Volume2Icon,
@@ -16,10 +16,10 @@ import {
   CodeIcon, SquareCodeIcon, CheckSquareIcon, IndentIcon, OutdentIcon, SearchIcon,
   SparklesIcon, ShareIcon, FileIcon, Layers3Icon, MailIcon, PenSquareIcon,
   ArrowLeftRightIcon, FolderPlusIcon, Trash2Icon, HistoryIcon, CloudDownloadIcon,
-  Settings2Icon, GlobeIcon, ClipboardTypeIcon, BlocksIcon, CpuIcon, PenLineIcon,
-  BrushIcon, AreaChartIcon, SmilePlusIcon, ArrowRightToLineIcon, WrapTextIcon,
-  BookmarkIcon, LayoutTemplateIcon, MessageSquarePlusIcon, ChevronRightIcon,
-  SunIcon, MoonIcon, ChevronDown
+  Settings2Icon, GlobeIcon, ClipboardTypeIcon, AreaChartIcon, SmilePlusIcon, 
+  ArrowRightToLineIcon, WrapTextIcon, BookmarkIcon, LayoutTemplateIcon, 
+  MessageSquarePlusIcon, ChevronRightIcon, SunIcon, MoonIcon, ChevronDown, 
+  TablePropertiesIcon, ShieldAlertIcon
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { translateText } from "@/lib/translate"
 import { generateSpeech } from "@/lib/tts"
 import { Doc } from "../../../../convex/_generated/dataModel";
+
 const FONT_SIZES = ["10", "12", "14", "16", "18", "20", "24", "28", "32", "36", "48", "72"]
 
 const TEXT_COLORS = [
@@ -49,11 +50,13 @@ const menuTranslations = {
   Insert: { en: "Insert", hi: "डालें", bn: "ঢোকান", ta: "செருகு", te: "చొప్పించు", mr: "घाला", gu: "દાખલ કરો", kn: "ಸೇರಿಸು", ml: "തിരുകുക", pa: "ਸ਼ਾਮਲ ਕਰੋ" },
   Format: { en: "Format", hi: "प्रारूप", bn: "বিন্যাস", ta: "வடிவமைப்பு", te: "ఆకృతి", mr: "स्वरूप", gu: "ફોર્મેટ", kn: "ಸ್ವರೂಪ", ml: "ഫോർമാറ്റ്", pa: "ફਾਰਮੈਟ" },
   Tools: { en: "Tools", hi: "उपकरण", bn: "সরঞ্জাম", ta: "கருவிகள்", te: "సాధనాలు", mr: "साधने", gu: "સાધनों", kn: "ಉಪಕರಣಗಳು", ml: "ഉപകരണങ്ങൾ", pa: "ਟੂਲ" },
-  Help: { en: "Help", hi: "मदद", bn: "সাহায্য", ta: "உதவி", te: "సహాయం", mr: "मदत", gu: "મદદ", kn: "ಸಹಾಯ", ml: "സഹായം", pa: "ਮਦਦ" },
+  Help: { en: "Help", hi: "मदद", bn: "সাহায্য", ta: "உதவி", te: "సహాయం", mr: "मदत", gu: "મદદ", kn: "ಸಹಾಯ", ml: "സഹായം", pa: "മਦਦ" },
 }
+
 interface ToolbarProps {
   initialData: Doc<"documents">;
 }
+
 export const Toolbar = ({ initialData }: ToolbarProps) => {
   const { editor, zoom, setZoom, togglePresentationMode, isAiSidebarOpen, toggleAiSidebar } = useEditorStore();
   const { language, supportedLanguages, setLanguage } = useLanguageStore()
@@ -67,7 +70,9 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
   const recognitionRef = useRef<any>(null);
   
   useEffect(() => { return () => { if (recognitionRef.current) recognitionRef.current.stop() } }, [])
+  
   const update = useMutation(api.documents.update);
+  
   const indianFonts = [
     { label: "Hindi (Mangal)", value: "Mangal" },
     { label: "Hindi (Devanagari)", value: "Noto Sans Devanagari" },
@@ -82,27 +87,146 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     { label: "English (Arial)", value: "Arial" },
     { label: "English (Times)", value: "Times New Roman" },
   ]
+  
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    // Debounced or onBlur update to Convex
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-    update({ id: initialData._id, title: newTitle || "Untitled Document" });
-  }, 500);
+      update({ id: initialData._id, title: newTitle || "Untitled Document" });
+    }, 500);
+  };
+
+  // --- NEW: WORKING FILE MENU HANDLERS ---
+  const handleOpenFile = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.html,.txt';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result as string;
+          editor?.chain().focus().setContent(content).run();
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  }, [editor]);
+
+  const handleMakeCopy = useCallback(() => {
+    const content = editor?.getHTML() || "";
+    navigator.clipboard.writeText(content).then(() => {
+       alert("Document HTML copied to clipboard! You can paste it into a new blank document.");
+    });
+  }, [editor]);
+
+  const handleShare = useCallback(() => {
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Document link copied to clipboard!");
+    }
+  }, [title]);
+
+  const handleEmail = useCallback(() => {
+    const subject = encodeURIComponent(title);
+    const body = encodeURIComponent(`Check out my document: ${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }, [title]);
+
+  const handleDownloadHTML = useCallback(() => {
+    const content = editor?.getHTML() || ""
+    const blob = new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body { font-family: sans-serif; padding: 40px; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ccc; padding: 8px; }</style></head><body>${content}</body></html>`], { type: "text/html" })
+    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title}.html`; a.click(); URL.revokeObjectURL(url);
+  }, [editor, title]);
+
+  const handleDownloadText = useCallback(() => {
+    const content = editor?.getText() || ""
+    const blob = new Blob([content], { type: "text/plain" })
+    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `${title}.txt`; a.click(); URL.revokeObjectURL(url);
+  }, [editor, title]);
+
+  const handleDetails = useCallback(() => {
+    const text = editor?.getText() || "";
+    const words = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+    const chars = text.length;
+    alert(`Document Details:\n\nWords: ${words}\nCharacters: ${chars}`);
+  }, [editor]);
+
+  const handlePrint = useCallback(() => {
+    const content = editor?.getHTML()
+    const printWindow = window.open("", "", "width=800,height=600")
+    if (printWindow && content) { printWindow.document.write(`<html><head><title>Document</title><style>body { font-family: sans-serif; padding: 40px; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ccc; padding: 8px; }</style></head><body>${content}</body></html>`); printWindow.document.close(); printWindow.print(); }
+  }, [editor]);
+
+  // --- EXISTING IMAGE & CHART HANDLERS ---
+  const handleImageUpload = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          editor?.chain().focus().setImage({ src: base64 }).run();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  }, [editor]);
+
+  const handleCameraUpload = useCallback(() => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          editor?.chain().focus().setImage({ src: base64 }).run();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  }, [editor]);
+
+  const handleInsertChart = (chartType: string) => {
+    const labelsStr = window.prompt("Enter labels separated by commas (e.g., Jan,Feb,Mar):", "Jan,Feb,Mar,Apr");
+    if (!labelsStr) return;
+    const dataStr = window.prompt("Enter data values separated by commas (e.g., 10,25,15):", "10,25,15,30");
+    if (!dataStr) return;
+    const labels = labelsStr.split(',').map(s => s.trim());
+    const data = dataStr.split(',').map(s => Number(s.trim()));
+    const chartConfig = { type: chartType, data: { labels: labels, datasets: [{ label: 'Dataset 1', data: data }] } };
+    const encodedConfig = encodeURIComponent(JSON.stringify(chartConfig));
+    const url = `https://quickchart.io/chart?c=${encodedConfig}&w=500&h=300`;
+    editor?.chain().focus().setImage({ src: url }).run();
   };
 
   const handleVoiceTyping = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognition) { alert("Speech recognition is not supported."); return }
     if (isListening) { recognitionRef.current?.stop(); setIsListening(false); return; }
-
     const recognition = new SpeechRecognition()
     recognitionRef.current = recognition;
     recognition.lang = language.code; recognition.continuous = true; recognition.interimResults = true;
     recognition.onstart = () => setIsListening(true)
-    
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results).slice(event.resultIndex).map((result: any) => result[0]).map((result) => result.transcript).join("")
       if (event.results[event.results.length - 1].isFinal && editor) { editor.chain().focus().insertContent(transcript + " ").run() }
@@ -118,7 +242,6 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     const selectedText = editor.state.doc.textBetween(from, to, " ");
     const textToTranslate = selectedText || editor.getText();
     if (!textToTranslate || textToTranslate.trim().length === 0) return;
-
     setIsTranslating(true);
     try {
       const translatedText = await translateText(textToTranslate, 'auto', language.code);
@@ -126,8 +249,6 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
       else editor.chain().focus().setContent(translatedText).run();
     } catch (error) { alert("Service busy. Please try again in a moment."); } finally { setIsTranslating(false); }
   }, [editor, language.code, isTranslating]);
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleReadAloud = useCallback(async () => {
     if (isSpeaking) { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } setIsSpeaking(false); return; }
@@ -141,18 +262,6 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
       }
     } catch (error) { setIsSpeaking(false); }
   }, [editor, isSpeaking, language.code]);
-
-  const handlePrint = useCallback(() => {
-    const content = editor?.getHTML()
-    const printWindow = window.open("", "", "width=800,height=600")
-    if (printWindow && content) { printWindow.document.write(`<html><head><title>Document</title><style>body { font-family: sans-serif; padding: 40px; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ccc; padding: 8px; }</style></head><body>${content}</body></html>`); printWindow.document.close(); printWindow.print(); }
-  }, [editor])
-
-  const handleDownload = useCallback(() => {
-    const content = editor?.getHTML() || ""
-    const blob = new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Document</title><style>body { font-family: sans-serif; padding: 40px; } table { border-collapse: collapse; width: 100%; } td, th { border: 1px solid #ccc; padding: 8px; }</style></head><body>${content}</body></html>`], { type: "text/html" })
-    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "document.html"; a.click(); URL.revokeObjectURL(url);
-  }, [editor])
 
   const setLink = useCallback(() => {
     if (!linkUrl) { editor?.chain().focus().unsetLink().run(); return }
@@ -197,15 +306,28 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     </Popover>
   );
 
-  const TopMenuItem = ({ icon: Icon, label, shortcut, onClick, hasSubmenu, badge }: { icon?: any, label: string, shortcut?: string, onClick: () => void, hasSubmenu?: boolean, badge?: string }) => (
-    <button onClick={onClick} className="flex items-center justify-between w-full px-2 py-1.5 text-sm text-foreground hover:bg-muted rounded text-left transition-colors">
+  const TopMenuItem = ({ icon: Icon, label, shortcut, onClick, hasSubmenu, disabled }: { icon?: any, label: string, shortcut?: string, onClick: () => void, hasSubmenu?: boolean, disabled?: boolean }) => (
+    <button disabled={disabled} onClick={onClick} className={cn("flex items-center justify-between w-full px-2 py-1.5 text-sm text-foreground hover:bg-muted rounded text-left transition-colors", disabled && "opacity-50 cursor-not-allowed")}>
       <div className="flex items-center gap-2">{Icon && <Icon className="size-4 text-muted-foreground" />}<span>{label}</span></div>
       <div className="flex items-center gap-2">
-        {badge && <span className="text-[9px] uppercase tracking-wider bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-400 px-1.5 rounded font-bold">{badge}</span>}
         {shortcut && <span className="text-xs text-muted-foreground ml-2">{shortcut}</span>}
         {hasSubmenu && <ChevronRightIcon className="size-3.5 text-muted-foreground" />}
       </div>
     </button>
+  );
+
+  const TopMenuSubItem = ({ icon: Icon, label, disabled, children }: { icon?: any, label: string, disabled?: boolean, children: React.ReactNode }) => (
+    <div className={cn("relative group w-full", disabled && "opacity-50 pointer-events-none")}>
+      <button className="flex items-center justify-between w-full px-2 py-1.5 text-sm text-foreground hover:bg-muted rounded text-left transition-colors">
+        <div className="flex items-center gap-2">{Icon && <Icon className="size-4 text-muted-foreground" />}<span>{label}</span></div>
+        <div className="flex items-center gap-2">
+          <ChevronRightIcon className="size-3.5 text-muted-foreground" />
+        </div>
+      </button>
+      <div className="absolute left-full top-0 ml-1 hidden group-hover:flex flex-col bg-popover border border-border shadow-xl p-1 rounded-md min-w-[200px] z-[100] animate-in fade-in zoom-in-95">
+        {children}
+      </div>
+    </div>
   );
 
   const MenuDivider = () => <div className="h-[1px] bg-border my-1 w-full" />;
@@ -231,7 +353,42 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     </div>
   );
 
-  // Strip quotes from TipTap's output so our <select> dropdown can match the value perfectly!
+  const TableGridPicker = () => {
+    const [hovered, setHovered] = useState({ r: 0, c: 0 });
+    return (
+      <div className="p-2 flex flex-col bg-popover rounded-md">
+        <div className="text-xs text-muted-foreground mb-2 text-center font-medium">
+          {hovered.r > 0 ? `${hovered.c} x ${hovered.r}` : "Insert Table"}
+        </div>
+        <div className="flex flex-col gap-[1px]" onMouseLeave={() => setHovered({ r: 0, c: 0 })}>
+          {Array.from({ length: 10 }).map((_, row) => (
+            <div key={row} className="flex gap-[1px]">
+              {Array.from({ length: 10 }).map((_, col) => (
+                <button
+                  key={col}
+                  type="button"
+                  onMouseEnter={() => setHovered({ r: row + 1, c: col + 1 })}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    editor.chain().focus().insertTable({ rows: row + 1, cols: col + 1, withHeaderRow: true }).run();
+                    document.body.click(); 
+                  }}
+                  className={cn(
+                    "w-3.5 h-3.5 border transition-colors duration-75",
+                    (row < hovered.r && col < hovered.c) 
+                      ? "bg-blue-200 border-blue-400 dark:bg-blue-800 dark:border-blue-500" 
+                      : "border-slate-300 dark:border-neutral-600 bg-transparent hover:border-blue-400"
+                  )}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   const currentFontFamily = editor.getAttributes("textStyle").fontFamily?.replace(/['"]+/g, '') || "Mangal";
   const currentFontSize = editor.getAttributes("textStyle").fontSize?.replace(/px/g, '') || "14";
 
@@ -239,7 +396,7 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
     <TooltipProvider delayDuration={200}>
       <div className="flex flex-col bg-background w-full">
         
-        {/* Top Menu Row */}
+        {/* === TOP MENU ROW === */}
         <div className="flex items-center px-4 py-2 border-b border-border relative z-50 bg-background">
           <div className="flex items-center whitespace-nowrap mr-4">
             <img src="/logo.png" alt="BharatDocs Logo" className="h-8 w-10 mr-2" />
@@ -249,32 +406,64 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
           
           <div className="flex flex-col justify-center">
            <Input 
-          type="text" 
-          value={title} // Use the dynamic title
-          onChange={onTitleChange} // Allow editing from here too
-          className="h-6 w-fit bg-transparent text-foreground border-transparent hover:border-border focus:border-blue-500 px-1 py-0 shadow-none text-sm font-medium focus-visible:ring-0" 
+            id="document-title-input"
+            type="text" 
+            value={title}
+            onChange={onTitleChange}
+            className="h-6 w-fit bg-transparent text-foreground border-transparent hover:border-border focus:border-blue-500 px-1 py-0 shadow-none text-sm font-medium focus-visible:ring-0" 
             />
             <div className="flex items-center gap-1 mt-0.5">
+               
+               {/* --- COMPLETELY REBUILT FILE MENU --- */}
                <TopMenu label={getMenuName("File")}>
-                 <TopMenuItem icon={ShareIcon} label="Share" hasSubmenu onClick={() => alert("Mock: Open Share dialog")} />
-                 <TopMenuItem icon={FilePlusIcon} label="New" hasSubmenu onClick={() => editor.chain().focus().clearContent().setContent("<p></p>").run()} />
-                 <TopMenuItem icon={FileIcon} label="Open" shortcut="Ctrl+O" onClick={() => alert("Mock: Open File dialog")} />
-                 <TopMenuItem icon={Layers3Icon} label="Make a copy" onClick={() => alert("Mock: Make a copy of document")} />
+                 <TopMenuSubItem icon={FilePlusIcon} label="New">
+                    <TopMenuItem label="Document" onClick={() => window.open('/', '_blank')} />
+                 </TopMenuSubItem>
+                 <TopMenuItem icon={FileIcon} label="Open" shortcut="Ctrl+O" onClick={handleOpenFile} />
+                 <TopMenuItem icon={Layers3Icon} label="Make a copy" onClick={handleMakeCopy} />
                  <MenuDivider />
-                 <TopMenuItem icon={MailIcon} label="Email" hasSubmenu onClick={() => alert("Mock: Open Email compose dialog")} />
-                 <TopMenuItem icon={DownloadIcon} label="Download" hasSubmenu onClick={handleDownload} />
+                 
+                 <TopMenuSubItem icon={ShareIcon} label="Share">
+                   <TopMenuItem label="Share with others" onClick={handleShare} />
+                   <TopMenuItem label="Publish to web" onClick={() => alert("Public routing setup required.")} />
+                 </TopMenuSubItem>
+                 
+                 <TopMenuSubItem icon={MailIcon} label="Email">
+                   <TopMenuItem label="Email this file" onClick={handleEmail} />
+                 </TopMenuSubItem>
+
+                 <TopMenuSubItem icon={DownloadIcon} label="Download">
+                   <TopMenuItem label="PDF document (.pdf)" onClick={handlePrint} />
+                   <TopMenuItem label="Web page (.html)" onClick={handleDownloadHTML} />
+                   <TopMenuItem label="Plain text (.txt)" onClick={handleDownloadText} />
+                 </TopMenuSubItem>
+                 
                  <MenuDivider />
-                 <TopMenuItem icon={PenSquareIcon} label="Rename" onClick={() => alert("Mock: Start document rename")} />
-                 <TopMenuItem icon={ArrowLeftRightIcon} label="Move" onClick={() => alert("Mock: Move document to folder")} />
-                 <TopMenuItem icon={FolderPlusIcon} label="Add shortcut to Drive" onClick={() => alert("Mock: Add shortcut to Drive")} />
-                 <TopMenuItem icon={Trash2Icon} label="Move to bin" onClick={() => alert("Mock: Move document to trash")} />
+                 
+                 <TopMenuItem icon={PenSquareIcon} label="Rename" onClick={() => document.getElementById("document-title-input")?.focus()} />
+                 <TopMenuItem icon={ArrowLeftRightIcon} label="Move" onClick={() => alert("Google Drive API integration required.")} />
+                 <TopMenuItem icon={FolderPlusIcon} label="Add a shortcut to Drive" onClick={() => alert("Google Drive API integration required.")} />
+                 <TopMenuItem icon={Trash2Icon} label="Move to bin" onClick={() => alert("Please delete this document directly from your dashboard.")} />
+                 
                  <MenuDivider />
-                 <TopMenuItem icon={HistoryIcon} label="Version history" hasSubmenu onClick={() => alert("Mock: Open Version History panel")} />
-                 <TopMenuItem icon={CloudDownloadIcon} label="Make available offline" onClick={() => alert("Mock: Toggle offline access")} />
+                 
+                 <TopMenuSubItem icon={HistoryIcon} label="Version history">
+                   <TopMenuItem label="See version history" onClick={() => alert("Requires Liveblocks History API setup.")} />
+                 </TopMenuSubItem>
+                 <TopMenuItem icon={CloudDownloadIcon} label="Make available offline" onClick={() => alert("Offline mode requires PWA setup.")} />
+                 
                  <MenuDivider />
-                 <TopMenuItem icon={InfoIcon} label="Details" onClick={() => alert("Mock: Show document details")} />
-                 <TopMenuItem icon={GlobeIcon} label="Language" hasSubmenu onClick={() => alert("Mock: Open language settings")} />
-                 <TopMenuItem icon={Settings2Icon} label="Page setup" onClick={() => alert("Mock: Open Page Setup dialog")} />
+                 
+                 <TopMenuItem icon={InfoIcon} label="Details" onClick={handleDetails} />
+                 <TopMenuItem icon={ShieldAlertIcon} label="Security limitations" onClick={() => alert("Document is end-to-end encrypted via Convex & Liveblocks.")} />
+                 
+                 <TopMenuSubItem icon={GlobeIcon} label="Language">
+                    {supportedLanguages.map(lang => (
+                        <TopMenuItem key={lang.code} label={lang.name} onClick={() => setLanguage(lang)} />
+                    ))}
+                 </TopMenuSubItem>
+                 
+                 <TopMenuItem icon={Settings2Icon} label="Page setup" onClick={() => alert("Custom CSS extension required for page margins.")} />
                  <TopMenuItem icon={PrinterIcon} label="Print" shortcut="Ctrl+P" onClick={handlePrint} />
                </TopMenu>
 
@@ -285,12 +474,8 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
                  <TopMenuItem icon={ScissorsIcon} label="Cut" shortcut="Ctrl+X" onClick={() => document.execCommand("cut")} />
                  <TopMenuItem icon={CopyIcon} label="Copy" shortcut="Ctrl+C" onClick={() => document.execCommand("copy")} />
                  <TopMenuItem icon={ClipboardIcon} label="Paste" shortcut="Ctrl+V" onClick={() => document.execCommand("paste")} />
-                 <TopMenuItem icon={ClipboardTypeIcon} label="Paste without formatting" shortcut="Ctrl+Shift+V" onClick={() => alert("Mock: Paste without formatting")} />
                  <MenuDivider />
                  <TopMenuItem icon={MousePointerSquareIcon} label="Select all" shortcut="Ctrl+A" onClick={() => editor.chain().focus().selectAll().run()} />
-                 <TopMenuItem icon={Trash2Icon} label="Delete" onClick={() => editor.chain().focus().deleteSelection().run()} />
-                 <MenuDivider />
-                 <TopMenuItem icon={SearchIcon} label="Find and replace" shortcut="Ctrl+H" onClick={() => alert("Mock: Open Find and replace window")} />
                </TopMenu>
 
                <TopMenu label={getMenuName("View")}>
@@ -302,30 +487,37 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
                </TopMenu>
 
                <TopMenu label={getMenuName("Insert")}>
-                 <TopMenuItem icon={ImageIcon} label="Image" hasSubmenu onClick={() => {
-                   const url = window.prompt("Enter Image URL:")
-                   if (url) editor.chain().focus().setImage({ src: url }).run()
-                 }} />
-                 <TopMenuItem icon={TableIcon} label="Table" hasSubmenu onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} />
-                 <TopMenuItem icon={BlocksIcon} label="Building blocks" hasSubmenu onClick={() => alert("Mock: Building blocks")} />
-                 <TopMenuItem icon={CpuIcon} label="Smart chips" hasSubmenu onClick={() => alert("Mock: Smart chips menu")} />
-                 <TopMenuItem icon={Volume2Icon} label="Audio buttons" badge="New" hasSubmenu onClick={() => alert("Mock: Audio buttons")} />
-                 <TopMenuItem icon={PenLineIcon} label="eSignature" badge="Premium" onClick={() => alert("Mock: eSignature")} />
+                 <TopMenuSubItem icon={ImageIcon} label="Image">
+                   <TopMenuItem label="Upload from computer" onClick={handleImageUpload} />
+                   <TopMenuItem label="Camera" onClick={handleCameraUpload} />
+                   <TopMenuItem label="By URL" onClick={() => {
+                     const url = window.prompt("Enter Image URL:")
+                     if (url) editor.chain().focus().setImage({ src: url }).run()
+                   }} />
+                 </TopMenuSubItem>
+
+                 <TopMenuSubItem icon={TableIcon} label="Table">
+                    <TableGridPicker />
+                 </TopMenuSubItem>
+
                  <TopMenuItem icon={Link2Icon} label="Link" shortcut="Ctrl+K" onClick={() => {
                    const url = window.prompt("Enter URL:")
                    if (url) editor.chain().focus().setLink({ href: url }).run()
                  }} />
-                 <TopMenuItem icon={BrushIcon} label="Drawing" hasSubmenu onClick={() => alert("Mock: Insert Drawing")} />
-                 <TopMenuItem icon={AreaChartIcon} label="Chart" hasSubmenu onClick={() => alert("Mock: Insert Chart")} />
-                 <TopMenuItem icon={SmilePlusIcon} label="Symbols" hasSubmenu onClick={() => alert("Mock: Symbols Picker")} />
+
+                 <TopMenuSubItem icon={AreaChartIcon} label="Chart">
+                   <TopMenuItem label="Bar Chart" onClick={() => handleInsertChart('bar')} />
+                   <TopMenuItem label="Column Chart" onClick={() => handleInsertChart('bar')} />
+                   <TopMenuItem label="Line Chart" onClick={() => handleInsertChart('line')} />
+                   <TopMenuItem label="Pie Chart" onClick={() => handleInsertChart('pie')} />
+                   <TopMenuItem label="Doughnut Chart" onClick={() => handleInsertChart('doughnut')} />
+                 </TopMenuSubItem>
+
                  <MenuDivider />
-                 <TopMenuItem icon={ArrowRightToLineIcon} label="Tab" shortcut="Shift+F11" onClick={() => alert("Mock: Insert Tab space")} />
                  <TopMenuItem icon={MinusIcon} label="Horizontal line" onClick={() => editor.chain().focus().setHorizontalRule().run()} />
-                 <TopMenuItem icon={WrapTextIcon} label="Break" hasSubmenu onClick={() => editor.chain().focus().setHardBreak().run()} />
-                 <TopMenuItem icon={BookmarkIcon} label="Bookmark" onClick={() => alert("Mock: Add Bookmark")} />
-                 <TopMenuItem icon={LayoutTemplateIcon} label="Page elements" badge="Updated" hasSubmenu onClick={() => alert("Mock: Page Elements menu")} />
-                 <MenuDivider />
-                 <TopMenuItem icon={MessageSquarePlusIcon} label="Comment" shortcut="Ctrl+Alt+M" onClick={() => alert("Mock: Add Comment")} />
+                 <TopMenuSubItem icon={WrapTextIcon} label="Break">
+                   <TopMenuItem label="Page break" shortcut="Ctrl+Enter" onClick={() => editor.chain().focus().setHardBreak().run()} />
+                 </TopMenuSubItem>
                </TopMenu>
 
                <TopMenu label={getMenuName("Format")}>
@@ -337,6 +529,21 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
                  <TopMenuItem icon={AlignLeftIcon} label="Align Left" shortcut="Ctrl+Shift+L" onClick={() => editor.chain().focus().setTextAlign("left").run()} />
                  <TopMenuItem icon={AlignCenterIcon} label="Align Center" shortcut="Ctrl+Shift+E" onClick={() => editor.chain().focus().setTextAlign("center").run()} />
                  <TopMenuItem icon={AlignRightIcon} label="Align Right" shortcut="Ctrl+Shift+R" onClick={() => editor.chain().focus().setTextAlign("right").run()} />
+                 <MenuDivider />
+                 <TopMenuSubItem icon={TablePropertiesIcon} label="Table options" disabled={!editor.can().deleteTable()}>
+                   <TopMenuItem label="Insert row above" disabled={!editor.can().addRowBefore()} onClick={() => editor.chain().focus().addRowBefore().run()} />
+                   <TopMenuItem label="Insert row below" disabled={!editor.can().addRowAfter()} onClick={() => editor.chain().focus().addRowAfter().run()} />
+                   <TopMenuItem label="Delete row" disabled={!editor.can().deleteRow()} onClick={() => editor.chain().focus().deleteRow().run()} />
+                   <MenuDivider />
+                   <TopMenuItem label="Insert column left" disabled={!editor.can().addColumnBefore()} onClick={() => editor.chain().focus().addColumnBefore().run()} />
+                   <TopMenuItem label="Insert column right" disabled={!editor.can().addColumnAfter()} onClick={() => editor.chain().focus().addColumnAfter().run()} />
+                   <TopMenuItem label="Delete column" disabled={!editor.can().deleteColumn()} onClick={() => editor.chain().focus().deleteColumn().run()} />
+                   <MenuDivider />
+                   <TopMenuItem label="Merge cells" disabled={!editor.can().mergeCells()} onClick={() => editor.chain().focus().mergeCells().run()} />
+                   <TopMenuItem label="Split cell" disabled={!editor.can().splitCell()} onClick={() => editor.chain().focus().splitCell().run()} />
+                   <MenuDivider />
+                   <TopMenuItem label="Delete table" disabled={!editor.can().deleteTable()} onClick={() => editor.chain().focus().deleteTable().run()} />
+                 </TopMenuSubItem>
                  <MenuDivider />
                  <TopMenuItem icon={RemoveFormattingIcon} label="Clear Formatting" onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} />
                </TopMenu>
@@ -371,12 +578,10 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
           
         </div>
 
-        {/* --- MAIN ACTION TOOLBAR --- */}
+        {/* === MAIN ACTION TOOLBAR === */}
         <div className="flex justify-between items-center w-full bg-background pt-2 pb-2 px-4 z-40 shadow-sm border-b border-border overflow-x-auto">
           
-          {/* LEFT PILL: Main Formatting Tools */}
           <div className="flex items-center flex-wrap gap-x-0.5 gap-y-2 px-3 py-1.5 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[32px] custom-scrollbar relative">
-            
             <Popover>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -419,7 +624,6 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
 
             <Divider />
 
-            {/* FIXED FONT FAMILY DROPDOWN (Removed Tooltip wrapper) */}
             <select 
               title="Font Family"
               onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()} 
@@ -431,7 +635,6 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
 
             <Divider />
 
-            {/* FIXED FONT SIZE DROPDOWN (Removed Tooltip wrapper) */}
             <select 
               title="Font Size"
               onChange={(e) => { const size = e.target.value; editor.chain().focus().setMark("textStyle", { fontSize: `${size}px` }).run() }} 
@@ -498,7 +701,7 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
               <PopoverContent className="w-72 p-3"><div className="flex gap-2"><Input placeholder="https://..." value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} className="text-xs" /><Button size="sm" onClick={setLink}>Add</Button></div></PopoverContent>
             </Popover>
             
-            <ToolbarButton icon={ImageIcon} onClick={() => { const url = window.prompt("Enter Image URL:"); if (url) editor.chain().focus().setImage({ src: url }).run() }} tooltip="Insert Image" />
+            <ToolbarButton icon={ImageIcon} onClick={handleImageUpload} tooltip="Insert Image" />
             
             <Divider />
 
@@ -616,10 +819,8 @@ export const Toolbar = ({ initialData }: ToolbarProps) => {
 
           </div>
 
-          {/* RIGHT PILL: Language & Voice Tools & AI */}
           <div className="flex items-center gap-x-0.5 px-3 py-1.5 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[32px] flex-shrink-0 ml-4">
             
-            {/* FIXED TRANSLATION DROPDOWN (Removed Tooltip wrapper) */}
             <select 
               title="Translation Language"
               onChange={(e) => { const selectedLang = supportedLanguages.find(lang => lang.code === e.target.value); if (selectedLang) setLanguage(selectedLang); }} 

@@ -65,9 +65,9 @@ export default function DocumentIdPage({ params }: DocumentIdPageProps) {
               style={{ zoom: zoom / 100 }}
             >
               {/* MUCH SMALLER PADDING: px-12 gives the text a very wide writing area */}
-              <div className="w-full h-full px-12 py-16">
-                <Editor />
-              </div>
+           <div className="w-full h-full px-16 py-16">
+  <Editor initialContent={document.initialContent} />
+</div>
             </div>
           </div>
 
