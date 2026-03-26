@@ -251,7 +251,7 @@ export default function Home() {
   const removeDocument = useMutation(api.documents.remove); 
 
   const onCreateTemplate = (title: string, initialContent: string | null) => {
-    createDocument({ title, initialContent })
+    createDocument({ title, initialContent: initialContent ?? "" })
       .then((documentId) => {
         window.location.href = `/documents/${documentId}`;
       })
