@@ -35,7 +35,7 @@ export const DocumentShare = ({ documentId }: { documentId: Id<"documents"> }) =
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 gap-2 rounded-full border-blue-200 hover:bg-blue-50 dark:border-neutral-700">
           <UserPlus className="size-4 text-blue-600" />
-          <span className="text-xs font-medium">Share</span>
+          <span className="text-xs font-medium">Add</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
