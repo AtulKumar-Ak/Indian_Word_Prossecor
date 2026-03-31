@@ -54,20 +54,21 @@ export default function DocumentIdPage({ params }: DocumentIdPageProps) {
           )}
         >
           {/* Editor Workspace (Scrollable) */}
-          <div className="flex-1 overflow-y-auto bg-muted/40 dark:bg-neutral-900 flex justify-center py-10">
+          <div className="flex-1 overflow-y-auto bg-muted/40 dark:bg-neutral-900 flex justify-center px-2 py-4 sm:px-6 sm:py-8 lg:px-10">
             <div
               className={cn(
-                "shadow-2xl transition-all duration-300 h-fit mb-20",
+                "shadow-2xl transition-all duration-300 h-fit mb-16 w-full",
                 "bg-white dark:bg-neutral-950",
-                // MUCH WIDER SIZES: 950px for portrait, 1200px for landscape
-                isLandscape ? "w-[1200px] min-h-[850px]" : "w-[950px] min-h-[1200px]"
+                isLandscape
+                  ? "min-h-[55vh] max-w-full sm:min-h-[70vh] sm:max-w-[1100px] lg:min-h-[850px] lg:max-w-[1200px] xl:max-w-[1320px]"
+                  : "min-h-[60vh] max-w-full sm:min-h-[80vh] sm:max-w-[980px] lg:min-h-[1200px] lg:max-w-[1100px] xl:max-w-[1200px]"
               )}
               style={{ zoom: zoom / 100 }}
             >
               {/* MUCH SMALLER PADDING: px-12 gives the text a very wide writing area */}
-           <div className="w-full h-full px-16 py-16">
-  <Editor initialContent={document.initialContent} />
-</div>
+              <div className="w-full h-full px-3 py-5 sm:px-8 sm:py-10 lg:px-12 lg:py-14">
+                <Editor initialContent={document.initialContent} />
+              </div>
             </div>
           </div>
 

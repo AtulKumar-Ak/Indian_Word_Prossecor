@@ -617,7 +617,7 @@ const handleVoiceTyping = useCallback(() => {
   const TopMenu = ({ label, children }: { label: string, children: React.ReactNode }) => (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="px-2.5 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors focus:outline-none focus:bg-muted">
+        <button className="px-2 py-1 text-xs sm:px-2.5 sm:text-sm text-muted-foreground hover:bg-muted hover:text-foreground rounded transition-colors focus:outline-none focus:bg-muted">
           {label}
         </button>
       </PopoverTrigger>
@@ -718,22 +718,22 @@ const handleVoiceTyping = useCallback(() => {
       <div className="flex flex-col bg-background w-full">
         
         {/* === TOP MENU ROW === */}
-        <div className="flex items-center px-4 py-2 border-b border-border relative z-50 bg-background">
-          <div className="flex items-center whitespace-nowrap mr-4">
+        <div className="flex flex-col gap-2 px-3 py-1.5 border-b border-border relative z-50 bg-background sm:flex-row sm:items-center sm:gap-4 sm:px-4 sm:py-2">
+          <div className="flex items-center whitespace-nowrap sm:mr-4">
             <img src="/logo.png" alt="BharatDocs Logo" className="h-8 w-10 mr-2" />
             <span className="font-bold text-lg text-[#F69836]">Bharat</span>
             <span className="text-lg text-[#2F87C7]">Docs</span>
           </div>
           
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center w-full sm:w-auto">
            <Input 
             id="document-title-input"
             type="text" 
             value={title}
             onChange={onTitleChange}
-            className="h-6 w-fit bg-transparent text-foreground border-transparent hover:border-border focus:border-blue-500 px-1 py-0 shadow-none text-sm font-medium focus-visible:ring-0" 
+            className="h-6 w-full max-w-[260px] bg-transparent text-foreground border-transparent hover:border-border focus:border-blue-500 px-1 py-0 shadow-none text-sm font-medium focus-visible:ring-0" 
             />
-            <div className="flex items-center gap-1 mt-0.5">
+            <div className="flex items-center gap-1 mt-0.5 flex-nowrap max-w-full overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
                
                {/* --- COMPLETELY REBUILT FILE MENU --- */}
                <TopMenu label={getMenuName("File")}>
@@ -900,9 +900,7 @@ const handleVoiceTyping = useCallback(() => {
             </div>
           </div>
           
-          <div className="flex-grow" /> 
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto justify-between sm:justify-start">
             <DocumentShare documentId={initialData._id} />
             <Tooltip>
               <TooltipTrigger asChild>
@@ -920,9 +918,9 @@ const handleVoiceTyping = useCallback(() => {
         </div>
 
         {/* === MAIN ACTION TOOLBAR === */}
-        <div className="flex justify-between items-center w-full bg-background pt-2 pb-2 px-4 z-40 shadow-sm border-b border-border overflow-x-auto">
+        <div className="flex flex-col gap-1.5 w-full bg-background py-1.5 px-2 z-40 shadow-sm border-b border-border sm:py-2 sm:px-4 lg:flex-row lg:items-center">
           
-          <div className="flex items-center flex-wrap gap-x-0.5 gap-y-2 px-3 py-1.5 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[32px] custom-scrollbar relative">
+          <div className="flex items-center flex-nowrap gap-x-0.5 px-2 py-1 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[24px] custom-scrollbar relative w-full overflow-x-auto sm:px-3 sm:py-1.5 sm:rounded-[32px]">
             <Popover>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1169,7 +1167,7 @@ const handleVoiceTyping = useCallback(() => {
 
           </div>
 
-          <div className="flex items-center gap-x-0.5 px-3 py-1.5 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[32px] flex-shrink-0 ml-4">
+          <div className="flex items-center flex-wrap gap-x-0.5 px-2 py-1 bg-[#f0f4f9] dark:bg-[#1e1f22] rounded-[24px] w-full lg:w-auto lg:flex-nowrap lg:flex-shrink-0 lg:ml-4 sm:px-3 sm:py-1.5 sm:rounded-[32px]">
             
             <select 
               title="Translation Language"
